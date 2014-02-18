@@ -1,4 +1,6 @@
-package com.lumbi.swipecelltest;
+package com.lumbi.swipecellsample;
+
+import com.lumbi.swipecelltest.R;
 
 import android.app.Activity;
 import android.os.Bundle;

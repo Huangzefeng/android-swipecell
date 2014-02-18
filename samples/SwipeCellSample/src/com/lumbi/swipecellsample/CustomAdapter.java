@@ -1,4 +1,4 @@
-package com.lumbi.swipecelltest;
+package com.lumbi.swipecellsample;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import com.lumbi.swipecelltest.R;
 import com.lumbi.widgets.SwipeCell;
 
 public class CustomAdapter extends BaseAdapter {

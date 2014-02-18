@@ -58,10 +58,11 @@ public class SwipeCell extends HorizontalScrollView{
 	}
 
 	public void dismissAction(boolean animated){
+		int leftActionWidth = leftActionView != null ? leftActionView.getWidth() : 0; 
 		if(animated){
-			smoothScrollTo(leftActionView.getWidth(), 0);
+			smoothScrollTo(leftActionWidth, 0);
 		}else{
-			scrollTo(leftActionView.getWidth(), 0);
+			scrollTo(leftActionWidth, 0);
 		}
 	}
 
@@ -105,7 +106,7 @@ public class SwipeCell extends HorizontalScrollView{
 			if(getScrollX() <= 0){ //Full left scroll
 			}else if(getScrollX() >= lw + rw){ //Full right scroll				
 			}else{
-				smoothScrollTo(leftActionView.getWidth(), 0);
+				smoothScrollTo(lw, 0);
 			}
 			break;
 		}
@@ -123,8 +124,8 @@ public class SwipeCell extends HorizontalScrollView{
 
 		contentLayout.layout(0, 0, w+lw+rw, h);
 		contentView.layout(lw, 0, w+lw, h);
-		leftActionView.layout(0, 0, lw, h);
-		rightActionView.layout(w+lw, 0, w+lw+rw, h);
+		if(leftActionView != null) leftActionView.layout(0, 0, lw, h);
+		if(rightActionView != null) rightActionView.layout(w+lw, 0, w+lw+rw, h);
 
 		scrollTo(lw,0);
 	}
