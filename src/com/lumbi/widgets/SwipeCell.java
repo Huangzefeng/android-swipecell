@@ -1,6 +1,8 @@
 package com.lumbi.widgets;
 
 import android.content.Context;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,7 +11,8 @@ import android.widget.HorizontalScrollView;
 
 public class SwipeCell extends HorizontalScrollView{
 
-	protected ViewGroup contentLayout;
+	protected FrameLayout contentLayout;
+	protected int contentId;
 	protected View contentView;
 	protected View leftActionView;
 	protected View rightActionView;
@@ -22,6 +25,11 @@ public class SwipeCell extends HorizontalScrollView{
 		this.setVerticalScrollBarEnabled(false);
 
 		contentLayout = new FrameLayout(context);
+		contentLayout.setLayoutParams(
+				new FrameLayout.LayoutParams(
+						FrameLayout.LayoutParams.MATCH_PARENT,
+						FrameLayout.LayoutParams.MATCH_PARENT
+				));
 		this.addView(contentLayout);
 	}
 
@@ -67,19 +75,15 @@ public class SwipeCell extends HorizontalScrollView{
 	}
 
 	public void setContentView(int contentId, int leftActionId, int rightActionId){
-		contentView = View.inflate(getContext(), contentId, null);
-		ViewGroup.LayoutParams contentParams = new ViewGroup.LayoutParams(
-				ViewGroup.LayoutParams.MATCH_PARENT,
-				ViewGroup.LayoutParams.WRAP_CONTENT
-				);
-		contentView.setLayoutParams(contentParams);
-		contentLayout.addView(contentView);
+		this.contentId = contentId;
+		contentLayout = (FrameLayout) LayoutInflater.from(getContext()).inflate(contentId, contentLayout, true);
+		contentView = contentLayout.getChildAt(0);
 
 		if(leftActionId > 0){
 			leftActionView = View.inflate(getContext(), leftActionId, null);
-			ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
-					ViewGroup.LayoutParams.WRAP_CONTENT,
-					ViewGroup.LayoutParams.MATCH_PARENT
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+					FrameLayout.LayoutParams.WRAP_CONTENT,
+					FrameLayout.LayoutParams.MATCH_PARENT
 					);
 			leftActionView.setLayoutParams(params);
 			contentLayout.addView(leftActionView);
@@ -87,9 +91,9 @@ public class SwipeCell extends HorizontalScrollView{
 
 		if(rightActionId > 0){
 			rightActionView = View.inflate(getContext(), rightActionId, null);
-			ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(
-					ViewGroup.LayoutParams.WRAP_CONTENT,
-					ViewGroup.LayoutParams.MATCH_PARENT
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+					FrameLayout.LayoutParams.WRAP_CONTENT,
+					FrameLayout.LayoutParams.MATCH_PARENT
 					);
 			rightActionView.setLayoutParams(params);
 			contentLayout.addView(rightActionView);
@@ -117,13 +121,19 @@ public class SwipeCell extends HorizontalScrollView{
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		super.onLayout(changed, l, t, r, b);
 
+		Log.w("TEST", String.format("L[%d] T[%d] R[%d] B[%d]", l,t,r,b));
+		
 		int lw = leftActionView != null ? leftActionView.getWidth() : 0;
 		int rw = rightActionView != null ? rightActionView.getWidth() : 0;
-		int w = getWidth();
-		int h = getHeight();
-
+		int w = r-l;
+		int h = b-t;
+		
+		Log.w("TEST", String.format("LW[%d] RW[%d]", lw,rw));
+		
 		contentLayout.layout(0, 0, w+lw+rw, h);
+		
 		contentView.layout(lw, 0, w+lw, h);
+		
 		if(leftActionView != null) leftActionView.layout(0, 0, lw, h);
 		if(rightActionView != null) rightActionView.layout(w+lw, 0, w+lw+rw, h);
 

@@ -61,7 +61,7 @@ public class CustomAdapter extends BaseAdapter {
 				Log.d("SwipeCellSample", "RIGHT CLICKED! " + s);
 			}
 		});
-		TextView textView = (TextView) swipeCell.findViewById(R.id.text);
+		TextView textView = (TextView) swipeCell.findViewById(R.id.searchResultListTitle);
 		textView.setText(s);
 
 		return swipeCell;
