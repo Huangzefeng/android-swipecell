@@ -1,11 +1,11 @@
 package com.lumbi.widgets;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 
@@ -29,7 +29,7 @@ public class SwipeCell extends HorizontalScrollView{
 				new FrameLayout.LayoutParams(
 						FrameLayout.LayoutParams.MATCH_PARENT,
 						FrameLayout.LayoutParams.MATCH_PARENT
-				));
+						));
 		this.addView(contentLayout);
 	}
 
@@ -117,26 +117,34 @@ public class SwipeCell extends HorizontalScrollView{
 		return true;
 	}
 
+
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		super.onLayout(changed, l, t, r, b);
 
-		Log.w("TEST", String.format("L[%d] T[%d] R[%d] B[%d]", l,t,r,b));
-		
 		int lw = leftActionView != null ? leftActionView.getWidth() : 0;
 		int rw = rightActionView != null ? rightActionView.getWidth() : 0;
 		int w = r-l;
 		int h = b-t;
 		
-		Log.w("TEST", String.format("LW[%d] RW[%d]", lw,rw));
-		
 		contentLayout.layout(0, 0, w+lw+rw, h);
-		
 		contentView.layout(lw, 0, w+lw, h);
-		
+
 		if(leftActionView != null) leftActionView.layout(0, 0, lw, h);
 		if(rightActionView != null) rightActionView.layout(w+lw, 0, w+lw+rw, h);
 
-		scrollTo(lw,0);
+		
+		setScrollX(lw);
+	}
+
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec){
+		super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+		int wspec = MeasureSpec.makeMeasureSpec(getMeasuredWidth(), MeasureSpec.EXACTLY);
+		int hspec = MeasureSpec.makeMeasureSpec(getMeasuredHeight(), MeasureSpec.EXACTLY);
+		for(int i=0; i<getChildCount(); i++){
+			View v = getChildAt(i);
+			v.measure(wspec, hspec);
+		}
 	}
 }
