@@ -2,7 +2,6 @@ package com.lumbi.widgets;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,6 +24,7 @@ public class SwipeCell extends HorizontalScrollView{
 		this.setVerticalScrollBarEnabled(false);
 
 		contentLayout = new FrameLayout(context);
+		contentLayout.setBackgroundColor(Color.TRANSPARENT);
 		contentLayout.setLayoutParams(
 				new FrameLayout.LayoutParams(
 						FrameLayout.LayoutParams.MATCH_PARENT,
@@ -79,22 +79,20 @@ public class SwipeCell extends HorizontalScrollView{
 		contentLayout = (FrameLayout) LayoutInflater.from(getContext()).inflate(contentId, contentLayout, true);
 		contentView = contentLayout.getChildAt(0);
 
+		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+				FrameLayout.LayoutParams.WRAP_CONTENT,
+				FrameLayout.LayoutParams.MATCH_PARENT
+				);
+		
 		if(leftActionId > 0){
 			leftActionView = View.inflate(getContext(), leftActionId, null);
-			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-					FrameLayout.LayoutParams.WRAP_CONTENT,
-					FrameLayout.LayoutParams.MATCH_PARENT
-					);
 			leftActionView.setLayoutParams(params);
 			contentLayout.addView(leftActionView);
 		}		
 
 		if(rightActionId > 0){
 			rightActionView = View.inflate(getContext(), rightActionId, null);
-			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-					FrameLayout.LayoutParams.WRAP_CONTENT,
-					FrameLayout.LayoutParams.MATCH_PARENT
-					);
+			
 			rightActionView.setLayoutParams(params);
 			contentLayout.addView(rightActionView);
 		}
@@ -128,12 +126,12 @@ public class SwipeCell extends HorizontalScrollView{
 		int h = b-t;
 		
 		contentLayout.layout(0, 0, w+lw+rw, h);
-		contentView.layout(lw, 0, w+lw, h);
-
+		
 		if(leftActionView != null) leftActionView.layout(0, 0, lw, h);
 		if(rightActionView != null) rightActionView.layout(w+lw, 0, w+lw+rw, h);
-
 		
+		contentView.layout(lw, 0, w+lw, h);
+	
 		setScrollX(lw);
 	}
 
