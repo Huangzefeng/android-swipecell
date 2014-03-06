@@ -2,6 +2,7 @@ package com.lumbi.widgets;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -22,14 +23,14 @@ public class SwipeCell extends HorizontalScrollView{
 
 		this.setHorizontalScrollBarEnabled(false);
 		this.setVerticalScrollBarEnabled(false);
-
 		contentLayout = new FrameLayout(context);
 		contentLayout.setBackgroundColor(Color.TRANSPARENT);
-		contentLayout.setLayoutParams(
-				new FrameLayout.LayoutParams(
-						FrameLayout.LayoutParams.MATCH_PARENT,
-						FrameLayout.LayoutParams.MATCH_PARENT
-						));
+		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+				FrameLayout.LayoutParams.MATCH_PARENT,
+				FrameLayout.LayoutParams.MATCH_PARENT
+				);
+		params.gravity = Gravity.CENTER;
+		contentLayout.setLayoutParams(params);
 		this.addView(contentLayout);
 	}
 
@@ -79,20 +80,24 @@ public class SwipeCell extends HorizontalScrollView{
 		contentLayout = (FrameLayout) LayoutInflater.from(getContext()).inflate(contentId, contentLayout, true);
 		contentView = contentLayout.getChildAt(0);
 
-		FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-				FrameLayout.LayoutParams.WRAP_CONTENT,
-				FrameLayout.LayoutParams.MATCH_PARENT
-				);
-		
 		if(leftActionId > 0){
 			leftActionView = View.inflate(getContext(), leftActionId, null);
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+					FrameLayout.LayoutParams.WRAP_CONTENT,
+					FrameLayout.LayoutParams.MATCH_PARENT
+					);
+			params.gravity = Gravity.LEFT;
 			leftActionView.setLayoutParams(params);
 			contentLayout.addView(leftActionView);
 		}		
 
 		if(rightActionId > 0){
 			rightActionView = View.inflate(getContext(), rightActionId, null);
-			
+			FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+					FrameLayout.LayoutParams.WRAP_CONTENT,
+					FrameLayout.LayoutParams.MATCH_PARENT
+					);
+			params.gravity = Gravity.RIGHT;
 			rightActionView.setLayoutParams(params);
 			contentLayout.addView(rightActionView);
 		}
@@ -115,23 +120,19 @@ public class SwipeCell extends HorizontalScrollView{
 		return true;
 	}
 
-
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		super.onLayout(changed, l, t, r, b);
 
-		int lw = leftActionView != null ? leftActionView.getWidth() : 0;
-		int rw = rightActionView != null ? rightActionView.getWidth() : 0;
+		int lw = leftActionView != null ? leftActionView.getMeasuredWidth() : 0;
+		int rw = rightActionView != null ? rightActionView.getMeasuredWidth() : 0;
 		int w = r-l;
 		int h = b-t;
+
+		contentLayout.layout(0, 0, lw+w+rw, h);
+		contentLayout.setBackgroundColor(Color.BLUE);
+		contentView.layout(lw, 0, lw+w, h);
 		
-		contentLayout.layout(0, 0, w+lw+rw, h);
-		
-		if(leftActionView != null) leftActionView.layout(0, 0, lw, h);
-		if(rightActionView != null) rightActionView.layout(w+lw, 0, w+lw+rw, h);
-		
-		contentView.layout(lw, 0, w+lw, h);
-	
 		setScrollX(lw);
 	}
 
