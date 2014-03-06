@@ -2,6 +2,7 @@ package com.lumbi.widgets;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ScrollView;
 
@@ -10,7 +11,10 @@ public class PullToView extends ScrollView {
 	//Should be in calculated from dpi
 	private int OVER_SCROLL_THRESHOLD_TOP = -300;
 	private int OVER_SCROLL_THRESHOLD_BOTTOM = 300;
-	private int overScrollYAccumulator=0;
+	private int overScrollYAccumulator = 0;
+	private int overScrollYCancelAccumulator = 0;
+
+	private boolean isDragging = false;
 
 	private boolean didPullTop = false;
 	private boolean didPullBottom = false;
@@ -45,22 +49,43 @@ public class PullToView extends ScrollView {
 			int scrollY, int scrollRangeX, int scrollRangeY,
 			int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
 
-		overScrollYAccumulator += deltaY;
+		boolean cancelOverScroll = false;
 
 		if(listener != null){
-			if(overScrollYAccumulator < 0){
-				float intensity = overScrollYAccumulator / (float)OVER_SCROLL_THRESHOLD_TOP;
-				if(intensity > 1.0f) intensity = 1.0f;
-				listener.onTopPulling(intensity);
-			}else{
-				float intensity = overScrollYAccumulator / (float)OVER_SCROLL_THRESHOLD_BOTTOM;
-				if(intensity > 1.0f) intensity = 1.0f;
-				listener.onBottomPulling(intensity);
+			if(scrollY <= 0 || scrollY >= scrollRangeY){
+				overScrollYAccumulator += deltaY;
+			}
+			Log.d("TEST", "ACC: "  + overScrollYAccumulator + " deltaY " +deltaY + " cancel = " + overScrollYCancelAccumulator);
+
+			if(isDragging && isTouchEvent){
+				if(overScrollYAccumulator < 0){
+					float intensity = overScrollYAccumulator / (float)OVER_SCROLL_THRESHOLD_TOP;
+					if(intensity > 1.0f) intensity = 1.0f;
+					listener.onTopPulling(intensity);
+				}else if(overScrollYAccumulator > 0){
+					float intensity = overScrollYAccumulator / (float)OVER_SCROLL_THRESHOLD_BOTTOM;
+					if(intensity > 1.0f) intensity = 1.0f;
+					listener.onBottomPulling(intensity);
+				}
+			}
+
+			if(didPullTop || didPullBottom){
+				overScrollYCancelAccumulator += deltaY;
+				cancelOverScroll = true;
+				if(didPullTop && overScrollYCancelAccumulator > -OVER_SCROLL_THRESHOLD_TOP/2.0f ||
+						didPullBottom && overScrollYCancelAccumulator < -OVER_SCROLL_THRESHOLD_BOTTOM/2.0f){
+					cancelTopAndBottom();
+				}
 			}
 		}
 
-		return super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX,
-				scrollRangeY, maxOverScrollX, maxOverScrollY, isTouchEvent);
+		if(!cancelOverScroll){
+			return super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX,
+					scrollRangeY, maxOverScrollX, maxOverScrollY, isTouchEvent);
+		}else{
+			return true;
+		}
+
 	}
 
 	@Override
@@ -69,21 +94,24 @@ public class PullToView extends ScrollView {
 
 		if(listener == null) return;
 
-		if(overScrollYAccumulator < OVER_SCROLL_THRESHOLD_TOP){
-			if(!didPullTop){
-				didPullTop = true;
-				listener.onTopPulled();
-			}
-		}else if(overScrollYAccumulator > OVER_SCROLL_THRESHOLD_BOTTOM){
-			if(!didPullBottom){
-				didPullBottom = true;
-				listener.onBottomPulled();
-			}
-		}else{
-			if(didPullTop || didPullBottom){
-				cancelTopAndBottom();
+		if(isDragging){
+			if(overScrollYAccumulator < OVER_SCROLL_THRESHOLD_TOP){
+				if(!didPullTop){
+					didPullTop = true;
+					listener.onTopPulled();
+				}
+			}else if(overScrollYAccumulator > OVER_SCROLL_THRESHOLD_BOTTOM){
+				if(!didPullBottom){
+					didPullBottom = true;
+					listener.onBottomPulled();
+				}
 			}
 		}
+	}
+
+	@Override
+	protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+		super.onScrollChanged(l, t, oldl, oldt);
 	}
 
 	@Override
@@ -92,14 +120,15 @@ public class PullToView extends ScrollView {
 
 		switch (event.getActionMasked()) {
 		case MotionEvent.ACTION_DOWN:
+			isDragging = true;
 			break;
 		case MotionEvent.ACTION_MOVE:
 			break;
 		case MotionEvent.ACTION_UP:
+			isDragging = false;
 			if(didPullTop){
 				didPullTop = false;
 				listener.onTopReleased();
-
 			}else if(didPullBottom){
 				didPullBottom = false;
 				listener.onBottomReleased();
@@ -112,15 +141,19 @@ public class PullToView extends ScrollView {
 			overScrollYAccumulator = 0;
 			cancelTopAndBottom();
 			break;
-		case MotionEvent.ACTION_SCROLL:
-			break;
 		}
 		return true;
 	}
 
 	private void cancelTopAndBottom(){
-		didPullTop = didPullBottom =false;
-		listener.onPullCancelled();
+		overScrollYAccumulator = 0;
+		overScrollYCancelAccumulator = 0;
+		if(didPullTop || didPullBottom){
+			didPullTop = didPullBottom = false;
+			if(listener != null){
+				listener.onPullCancelled();
+			}
+		}
 	}
 
 	public interface PullToViewListener{
