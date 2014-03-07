@@ -2,7 +2,6 @@ package com.lumbi.widgets;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ScrollView;
 
@@ -55,7 +54,6 @@ public class PullToView extends ScrollView {
 			if(scrollY <= 0 || scrollY >= scrollRangeY){
 				overScrollYAccumulator += deltaY;
 			}
-			Log.d("TEST", "ACC: "  + overScrollYAccumulator + " deltaY " +deltaY + " cancel = " + overScrollYCancelAccumulator);
 
 			if(isDragging && isTouchEvent){
 				if(overScrollYAccumulator < 0){
@@ -85,7 +83,6 @@ public class PullToView extends ScrollView {
 		}else{
 			return true;
 		}
-
 	}
 
 	@Override
@@ -116,6 +113,8 @@ public class PullToView extends ScrollView {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
+		if(!this.isEnabled()) return true;
+		
 		super.onTouchEvent(event);
 
 		switch (event.getActionMasked()) {
