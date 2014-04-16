@@ -130,7 +130,6 @@ public class SwipeCell extends HorizontalScrollView{
 		int h = b-t;
 
 		contentLayout.layout(0, 0, lw+w+rw, h);
-		contentLayout.setBackgroundColor(Color.BLUE);
 		contentView.layout(lw, 0, lw+w, h);
 		
 		setScrollX(lw);
